@@ -1,0 +1,55 @@
+<script type=fw/init>
+window.edit = function(elem) {
+	$('#addf').slideDown();
+	var key = $(elem).parents('.item').find('.key').text()
+	var value = $(elem).parents('.item').find('.val').text()
+	$('#key').val(key)
+	$('#val').val(value).focus()
+}
+</script>
+<style>
+#key, #val {
+	width: 70%;
+}
+code {
+	white-space: pre-wrap;
+	display: inline-block;
+	background: #eee;
+	overflow: auto;
+	max-height: 6em;
+}
+</style>
+
+<form action=set_collection(name:$new_name) method=post>
+	<!--<input type=text name=new_name value=$name />-->
+	<select name=new_name>
+		<fast-foreach list=$dicts var=dictname>
+			<option value=$dictname selected=$eq($dictname,$name)><display e="$dictname" /></option>
+		</fast-foreach>
+	</select>
+	<button submit>Go</button>
+</form>
+<if true=$name>
+	Items: <br>
+	<foreach list=$items var=item key=0>
+	<div class=item>
+		<span class=key><display e=$item.0 /></span>:
+		<code class=val onclick="edit(this)"><display-html e=$item.1 /></code>
+		<span style="margin-left: 2em;">
+			<a action="delete(key: $item.0)">Delete</a>
+			| <a class=fw-link onclick="edit(this)">Edit</a>
+		</span>
+	<div>
+	</foreach>
+	
+	<br>
+	<button onclick="jQuery('#addf').slideToggle()" class=fw-link>Add item...</button>
+	<form action=add(key:$key,val:$val) id=addf style="display: none;" name=addf>
+	<pre>
+		Key:               <input type=text name=key id=key />
+		Python expression: <textarea type=text name=val id=val rows=5></textarea>
+		                   <button submit>Add</button>
+	</pre>
+	</form>
+</if>
+</div>

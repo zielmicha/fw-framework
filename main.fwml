@@ -1,0 +1,278 @@
+[[PART main]]
+<h1 style="font-size: 5em; color: red; position: absolute; z-index: 9999;">No more start</h1>
+<div id=body-nomargin onmousemove="location.href='/'">
+
+<table id=main>
+<tr>
+<td class=toprow colspan=3>
+	<toprow />
+	<span class=armyrest> _ </span>
+</td>
+</tr>
+<tr>
+	<td class="acolumn armycol">	
+	</td>
+	<td id=map-cell>
+		<worldmap name=map />
+	</td>
+	<!--<td class=acolumn>
+		<loremipsum count=0 />
+	</td>-->
+</tr>
+</table>
+
+Credits: <a href="http://famfamfam.com/lab/icons/silk/">Slik iconset</a>
+
+<!--<include src=main.fwml:adjust-columns />-->
+
+[[PART map]]
+<div style="display: none" class=normal-map>
+	<div id=map>
+		<foreach var=entry list=$entries>
+		<if true=$entry.2>
+			<div style=$create_style($entry.0,$entry.1)>
+				<a href=game(city:$entry.2.1) class=map-parent>
+					<img src=/static/town.png class="mapicon" />
+					<span class=text><display e="$entry.2.3" /></span>
+				</a>
+			</div>
+		</if>
+		</foreach>
+		<a href="$next(x:16)" target=$this class=east fw_replace><span><img src=/static/img/arrow_right.png></span></a>
+		<a href="$next(x:-16)" target=$this class=west fw_replace><span><img src=/static/img/arrow_left.png></span></a>
+		<a href="$next(y: -8)" target=$this class=north fw_replace><span><img src=/static/img/arrow_up.png></span></a>
+		<a href="$next(y:-8)" target=$this class=south fw_replace><span><img src=/static/img/arrow_down.png></span></a>
+	</div>
+</div>
+<script type=fw/init>
+<![CDATA[
+	if($.browser.webkit) {
+		var ifr = '<div id=map-iframe-parent><iframe src=/static/map.html id=map-iframe><' + '/iframe>'
+		fw_elem.append($(ifr))
+	} else {
+		fw_elem.find('.normal-map').show()
+	}
+]]>
+</script>
+
+<script type=fw/resize>
+	var height = Math.min($(window).height() - 60, $(window).width() / 2 - 180)
+	
+	$('#map').css({
+		fontSize: height / 10
+	})
+	var h = $(window).height() - 60
+	var w = $('#map-iframe').width() || 500
+	$('#map-iframe').css({height: Math.min(h, w * 0.5)})
+</script>
+
+
+[[PART toprow]]
+<div class=nav>
+	Witaj, <display e=$name />
+	•
+	<a href="game()">Mapa</a>
+	•
+	<a href="game(what:messages)">Wiadomości</a>
+	•
+	<a href="game(what:friends)">Znajomi</a>
+	•
+	<a>Profil</a>
+	•
+	<a>Pomoc</a>
+	•
+	<a action=logout>Wyloguj</a>
+</div>
+<div></div>
+<span class=armynav><t>Army</t></span>
+
+<script type=fw/init>
+if($.browser.webkit)
+	$('.armyrest').css({position: 'absolute'})
+</script>
+	
+[[PART armycol]]
+
+[[PART prepare]]
+<div class=fw-overlay-parent>
+<div class=fw-overlay>
+<form action=do(cityname:$cityname)>
+	<label for=cityname>Wybierz nazwę swojego miasta</label>
+	<input name=cityname>
+	<button submit>Ok</button>
+</form>
+</div></div>
+
+[[PART game]]
+<div id=body-nomargin>
+
+<table id=main>
+<tr>
+<td class=toprow colspan=2>
+	<toprow />
+	<span class=armyrest> _ </span>
+</td>
+</tr>
+<tr>
+	<td class="acolumn armycol" colspan=2>
+		<div class=armycon>
+			<if false=$armies>(<t>No army movements</t>)</if>
+			<if true=$armies>
+				<script type=fw/init>
+					window.travelling_armies = <display e=$json($armies) />
+					window.server_time_offset = <display e=$json($time) /> * 3600 * 1000 - (new Date).getTime()
+					
+					window.getServerTime = function() {
+						return (window.parent.server_time_offset + (new Date).getTime()) / 3600 / 1000
+					}
+					
+					window.isMouseOver = true
+					$('body').bind('mousemove keyup mouseover', function(){
+						isMouseOver = true
+					}).mouseout(function(){
+						isMouseOver = false
+					})
+				</script>
+				<foreach list=$armies var=army>
+				<div class=army>
+					<strong><display e=$army.mission /></strong>
+					<mini-units e=$army.units />
+					<u><display e=$army.src /></u>
+					Cel: <u><display e=$army.dst /></u>
+					<if true=$gt($army.arrives,$time)>
+						Czas: <timecounter time=$sub($army.arrives,$time) />
+					</if>
+				</div>
+				</foreach>
+			</if>
+		</div>
+		<div class=cities>
+			<foreach list=$cities var=city>
+			<div class=city>
+				<city-preview id=$city />
+			</div>
+			</foreach>
+		</div>
+	</td>
+</tr>
+<tr>
+	<td id=content-cell>
+		<if true=$eq($what,map)>	
+			<worldmap name=map />
+		</if>
+		<if true=$eq($what,city)>
+			<city id=$city name=city />
+		</if>
+		
+		<if true=$eq($what,friends)>
+			<div class=margins><friends name=friends /></div>
+		</if>
+		<if true=$eq($what,messages)>
+			<div class=margins><messages name=messages /></div>
+		</if>
+	</td>
+</tr>
+</table>
+
+Credits: <a href="http://famfamfam.com/lab/icons/silk/">Slik iconset</a>
+
+<form action="set_lang(lang:$lang)" style="zoom: 0.7; display: inline">
+	<input type=text name=lang>
+	<button submit><t>Set language</t></button>
+</form>
+
+<div id=overlay-parent style=$overlay_style>
+	<div id=overlay-border>_</div>
+	<div id=overlay>
+		<display-html e=$get_dialog_content() />
+	</div>
+	<div id=overlay-close>
+		<a href=$get_dialog_url(name:)>
+			<img src=/static/img/icon_close.png />
+		</a>
+	</div>
+</div>
+<script type=fw/init>
+	$('#overlay-parent').draggable({handle: '#overlay-border'})
+	$('#overlay-close a').click(function(){
+		$('#overlay, #overlay-close, #overlay-border, #overlay-parent').slideUp()
+		setTimeout(function(){
+			$('#overlay, #overlay-close, #overlay-border').show()
+		}, 1000)
+		history.replaceState(null, null, '.')
+		window.fw_current_location = fw_get_location()
+		return false
+	})
+	$('[dialog]').unbind('click').click(function(){
+		var url = $(this).attr('href')
+		fw_run_widget_link({target: 'dialog', url: url})
+		$('#overlay-parent').show('slow')
+		return false
+	})
+</script>
+
+[[PART attack-dialog]]
+
+<form action=$attack_url id=attack-form>
+	<input type=hidden id=attack-city value=$city />
+	<div>Cel: <input type=text name=goal id=attack-goal /></div>
+	<div>Misja: <input type=text name=mission /></div>
+	<div>Czas: <input type=text name=time id=attack-time value=60 /> (s)</div>
+	<h4>Jednostki</h4>
+	<div id=attack-units>
+		<fast-foreach list=$units var=unit>
+		<div>
+			<text e=$unit />: <input type=text name=$unit unittype=$unit />
+		</div>
+		</fast-foreach>
+	</div>
+	<button submit>Wyślij misję!</button>
+	<div id=upkeep-widget></div>
+	
+	
+	<script type=fw/init><![CDATA[
+	function get_units() {
+		var units = ""
+		$('#attack-units input[unittype]').each(function(){
+			var val = parseInt(this.value)
+			if(val != val) val = 0
+			units += ',"' + $(this).attr('unittype') + '":' + val
+		})
+		return "{" + units.slice(1) + "}"
+	}
+	function load_widget() {
+		var time = parseFloat($('#attack-time').val()) / 3600
+		var dest = encodeURIComponent($('#attack-goal').val())
+		var city = encodeURIComponent($('#attack-city').val())
+		var units = get_units()
+		if(!dest) return;
+		var url = '/upkeep?time=' + time + '&units=' + units + '&dest=' + dest + '&city=' + city + '&__rpc=true'
+		$.get(url, function(data){
+			$('#upkeep-widget').html(data)
+		}) 
+	}
+	$('#attack-form input').blur(load_widget)
+	]]>
+	</script>
+
+</form>
+
+[[PART upkeep]]
+<div>
+<foreach list=$upkeep.items var=res>
+	<span class=res>
+		<img src=$get_img($res.0) class=small-img />
+		<display e=$int($res.1) />
+	</span>
+</foreach>
+</div>
+<display e=$mul($time,$int(3600)) /> s<br>
+<display e=$mul($walk_time,$int(3600)) /> s
+
+[[PART mini-units]]
+<fast-foreach list=$units.items var=item>
+<span title=$item.0>
+	<img src=$get_img($item.0,min) alt=$item.0 class=small-img />
+	<display e=$item.1 />
+</span>
+</fast-foreach>

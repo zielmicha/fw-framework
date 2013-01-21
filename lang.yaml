@@ -1,0 +1,53 @@
+en:
+   barracks: Barracks
+   gunner: Gunner
+   automatic: Marine
+   food: Food
+   wood: Wood
+   gold: Gold
+   uranium: Uranium
+   forest: Forest
+   farm: Farm
+   uraniummine: Uranium Mine
+   goldmine: Gold Mine
+   
+   invite: "%(name)s invites you to join CGame!"
+pl:
+   barracks: Koszary
+   gunner: Strzelec
+   automatic: Marine
+   rocketlauncher: Wyrz rakiet
+   food: Jedzenie
+   wood: Drewno
+   gold: Złoto
+   uranium: Uran
+   forest: Las
+   farm: Farma
+   factory: Fabryka
+   uraniummine: Kopalnia uranu
+   goldmine: Kopalnia złota
+   
+   Set language: Zmień język
+   Producing: Produkcja
+   How much: Ile
+   Buildings: Budynki
+   Level: Poziom
+   /hour: /godzinę
+   "No army movements": Brak ruchu wojsk
+   Army: Wojska
+   
+   Login: Zaloguj się
+   Sign up: Zarejestruj się
+   Login with Google: Zaloguj na konto GMail
+   Login with Facebook: Połącz z Facebookiem
+   Login with GG: Połącz z GG
+   
+   Edit this field and hit enter to change title: Edytuj to pole i naciśnij Enter, aby zmienić nazwę miasta
+   
+   invite: "%(name)s zaprasza cię do gry CGame!"
+   
+   Sender: Nadawca
+   Send mail: Wyślij wiadomość
+   Invite: Zaproś
+   Sent time: Wysłano
+   Left: Zostało

@@ -1,0 +1,28 @@
+<div id=body-nomargin>
+<div class=battle-body>
+
+<canvas width=1000 height=1000 id=battle-canvas></canvas>
+
+<script type=fw/init>
+window.cityname = <display e=$json($id) />
+window.buildings = <display e=$json($state.buildings) />
+</script>
+<script src=/static/battle.js></script>
+<script type=fw/init>
+<![CDATA[
+	
+]]>
+</script>
+
+<foreach var=building list=$state.buildings.items>
+	<div class=citybuilding buildingname=$building.0>
+		<img class=b />
+		<div class=rest>
+			<h2><text e=$building.0 /></h2>
+			<t>Level</t>: <display e=$building.1 />
+			<a action="build(name: $building.0)">
+				<img src=/static/add.png class=add-img alt="+">
+			</a>
+		</div>
+	</div>
+</foreach>

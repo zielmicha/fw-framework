@@ -1,0 +1,20 @@
+[[PART friends]]
+<foreach list=$friends var=friend>
+<div class=friend>
+	<div><b><display e=$friend.name /></b></div>
+	<div><display e=$friend.desc /></div>
+	<div>
+		<if true=$friend.is_using>
+			<if true=$eq($opt,none)>
+				<a href=game(profile:$friend.id)><t>Show profile</t></a>
+			</if>
+			<if true=$eq($opt,sendmail)>
+				<a href=game(what:messages;messages,to:$friend.id)><t>Send mail</t></a>
+			</if>
+		</if>
+		<if false=$friend.is_using>
+			<a action=invite(user:$friend.id)><t>Invite</t></a>
+		</if>
+	</div>
+</div>
+</foreach>

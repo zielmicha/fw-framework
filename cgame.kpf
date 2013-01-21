@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Komodo Project File - DO NOT EDIT -->
+<project id="b0db870a-fd26-471f-b793-9e43c0d8bdbc" kpf_version="4" name="cgame.kpf">
+<file id="2fd5772e-b6c7-4995-b9ba-b20813f3af99" idref="b0db870a-fd26-471f-b793-9e43c0d8bdbc" name="cho.cpp" url="file:///home/michal/cho.cpp">
+</file>
+<file id="eb5f4539-3cae-4b98-bd35-432570371dc0" idref="b0db870a-fd26-471f-b793-9e43c0d8bdbc" name="ProcessImages.py" url="file:///home/michal/Projects/cgi-bin/ProcessImages.py">
+</file>
+<preference-set idref="b0db870a-fd26-471f-b793-9e43c0d8bdbc">
+  <boolean id="import_live">1</boolean>
+</preference-set>
+</project>

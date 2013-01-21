@@ -1,0 +1,145 @@
+
+	/*var lock_elem = $('<div class=fw-lock></div>')
+	$('body').prepend(lock_elem)
+	var pos = elem.position()
+	lock_elem.css({
+		left: pos.left,
+		top: pos.top,
+		width: elem.width(),
+		height: elem.height()
+	})
+	lock_elem.hide()
+	lock_elem.slideDown()
+	return {unlock: function(){
+		lock_elem.slideUp()
+		setTimeout(function(){ lock_elem.remove() }, 1000)
+	}}*/
+	
+	
+/*var old_data = $(elem.outerHTML())
+		fw_set_elem_content(elem, html, replace)
+		old_data.find('[id=fw-body]').attr('id', null)
+		old_data.attr('fw_widget_path', null).find('[fw_widget_path]')
+			.attr('fw_widget_path', null)
+		$(document.body).append(old_data)
+		var pos = elem.position()
+		old_data.css({
+			left: pos.left,
+			top: pos.top,
+			position: 'absolute',
+			zIndex: 99999
+		})
+		//console.log('anim!', id, html)
+		old_data.slideUp()
+		setTimeout(function(){
+			old_data.remove()
+		}, fw_animation_time + 10)
+		elem.hide()
+		elem.fadeIn(fw_animation_time)
+	} else {*/
+	
+	if(fw_animation && !no_anim) {
+		var old_data = $(elem.outerHTML())
+		elem = fw_set_elem_content(elem, html, replace)
+		setTimeout(function(){
+			old_data.find('[id=fw-body]').attr('id', null)
+			old_data.attr('fw_widget_path', null).find('[fw_widget_path]')
+				.attr('fw_widget_path', null)
+			$(document.body).prepend(old_data)
+			var pos = elem.position()
+			if(elem.attr('fw_widget_path') == 'map' && window['ENABLE_MAP_HACK']) {
+				pos.top = 20
+			}
+			
+			old_data.css({
+				left: pos.left,
+				top: pos.top,
+				position: 'absolute',
+				zIndex: 99999
+			})
+			
+			old_data.slideUp()
+			setTimeout(function(){
+				old_data.remove()
+			}, fw_animation_time + 10)
+			elem.hide()
+			elem.fadeIn(fw_animation_time)
+		}, 50)
+	} else {
+	
+	
+	
+[[PART adjust-columns]]
+<script type="fw/init">
+	$('td.small-column').each(function(){
+		var elem = $(this)
+		var maxSize = 0
+		elem.wrapInner('<div style="display: inline-block;"></div>')
+		elem.removeClass('small-column')
+		var adjustSize = function(){
+			elem.attr('width', 'auto')
+			var newSize = elem.children('div').width() + 30
+			elem.attr('width', newSize)
+		}
+		adjustSize()
+		setTimeout(adjustSize, 0)
+		setInterval(adjustSize, 100)
+	})
+</script>
+
+<fast-foreach var=row list=$entries>
+	<div class=row>
+		<fast-foreach var=cell list=$row>
+			<span class=cell>
+				<if true="$cell">
+				<span class=over>
+					<a href=city(id:$cell.1)>
+						<img src=/static/town.png class=mapicon />
+					</a>
+				</span>
+				</if>
+				<img src="/static/grass.png" />
+			</span>
+		</fast-foreach>
+	</div>
+	
+	
+	
+	function incr(k, d) {
+		var it = setInterval(function(){
+			k-=1
+			ky+=d
+			if(k == 0) clearInterval(it)
+		}, 50)
+	}
+	
+	function drawPerspective(i, x, y, rot, scaleY, center, scaleY2) {
+		var y1 = y * scaleY - (y*y*scaleY2)
+		var scale = y1*rot + 1
+		var x1 = (x - center) * scale + center
+		drawPerspectiveImage(i, x1, y1, rot, scaleY, scaleY2)
+	}
+	
+	function drawPerspectiveImage(i, x, y, rot, scaleY, scaleY2) {
+		for(var j=0; j<=img.height*scaleY - 1; j++)
+			drawSlice(img, x, y+j, j/scaleY - j*j*scaleY2, (j/scaleY+y)*rot+1)
+	}
+	
+	function drawSlice(i, x, y, srcY, scale) {
+		var outWidth = i.width*scale
+		ctx.drawImage(i, 0, srcY, i.width, 1, x - outWidth/2, y, outWidth, 1)
+	}
+	
+	
+	
+	if tag.name[0] == '-':
+				tag.name = tag.name[1:]
+				self._add_child(tag)
+				return True
+			el
+			
+			
+			
+			logging.info(self.widget.__class__.__name__)
+			if self.widget.__class__.__name__ == 'BattleLogDialog':	
+				logging.info('<%s %s> %s', tag.name, tag.attrs, tag.children)

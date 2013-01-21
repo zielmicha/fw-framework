@@ -1,0 +1,17 @@
+game:
+- "/map/${map,x},${map,y}/${dialogname}"
+- "/map/${map,x},${map,y}"
+- "/city/${city}/${dialogname}"
+- "/city/${city}"
+- "/page/$what"
+- "/profile/$profile"
+- "/"
+
+admin.dbdict:
+- "/admin.dbdict/$ident"
+
+api:
+- "/api/$name"
+
+gate:
+- "/gate/$name/$path"

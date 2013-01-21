@@ -1,0 +1,14 @@
+modules:
+- fw.rewrite
+- fw.overlays
+- fw.widgets
+- fw.admin
+- fw.login
+- fw.login.google_provider
+- fw.login.gg
+- fw.login.testuser
+- profile
+- dev
+- main
+- city
+- chat

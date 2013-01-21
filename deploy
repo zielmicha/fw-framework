@@ -1,0 +1,4 @@
+#!/bin/bash
+python ~/Apps/google_appengine/appcfg.py update ~/Projects/cgame
+
+

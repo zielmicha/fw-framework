@@ -1,0 +1,280 @@
+<script src=/static/jquery.min.js></script>
+<link href=/static/map.css rel=stylesheet/less>
+<script src=/static/less.js type="text/javascript"></script>
+
+<div id=map>
+	<div id=cc>
+		<canvas height=400 width=400 id=c></canvas>
+	</div>
+	
+	<a class=east m=1,0><span><img src=/static/img/arrow_right.png></span></a>
+	<a class=west m=-1,0><span><img src=/static/img/arrow_left.png></span></a>
+	<a class=north m=0,-1><span><img src=/static/img/arrow_up.png></span></a>
+	<a class=south m=0,1><span><img src=/static/img/arrow_down.png></span></a>
+</div>
+<canvas height=800 width=800 id=hc></canvas>
+<script>
+var script3d
+if($.browser.webkit)
+	script3d = '/static/3d.js'
+else
+	script3d = '/static/dummy-3d.js'
+document.write('<script src=' + script3d + '><' + '/script>')
+</script>
+<script>
+	Map3d.globalZoom = 1.2
+	var canvas = $('#c')[0]
+	var hcanvas = $('#hc')[0]
+
+	function onLoad() {
+		adjustToWindow()
+		Map3d.render()
+		var anim_now_counter = 0
+		setInterval(function(){
+			// watch for xhr responses and army movements
+			if(window.parent.isMouseOver || (anim_now_counter++ % 6) == 0)
+				Map3d.render()
+		}, 100)
+	}
+	
+	var GY = 50, GX = 50;
+	var GW = 7, GH = 7
+	
+	Map3d.renderContent = function(hctx) {
+		hctx.textAlign = 'center'
+		var x = Map3d.x, y = Map3d.y
+		var grass_x = Math.ceil(x/grass.width), grass_y = Math.ceil(y/grass.height)
+		var grass_n = Math.ceil(
+				Math.max(hcanvas.height / grass.height, hcanvas.width / grass.width)) + 1
+		for(var i=-1; i<grass_n; i++) {
+			for(var k=-1; k<grass_n; k++) {
+				hctx.drawImage(grass, (grass_x+i)*grass.width, (grass_y+k)*grass.height)
+			}
+		}
+		/*hctx.fillStyle = "rgba(200, 0, 0, 1)";
+		hctx.fillRect(40, 40, 40, 40)
+		hctx.drawImage(cityImg, 100, 100)
+		hctx.fillStyle = "rgba(200, 200, 200, 1)";*/
+		
+		renderGame(hctx, Math.round(x / GX), Math.round(y / GY))
+	}
+	
+	function drawLine(hctx, x, y, x1, y1) {
+		hctx.beginPath()
+		hctx.moveTo(x, y)
+		hctx.lineTo(x1, y1)
+		hctx.closePath()
+		hctx.stroke()
+	}
+	
+	function renderGame(hctx, x, y) {
+		
+		hctx.lineWidth = 10
+		hctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'
+		//drawLine(hctx, 341 * GX, 315 * GY, 113 * GX, 373 * GY)
+		for(var i in window.parent.travelling_armies) {
+			var army = window.parent.travelling_armies[i]
+			var server_time = window.parent.getServerTime()
+			var perc = 1 - (server_time - army.left) / (army.arrives - army.left)
+			if(perc > 1 || perc < 0) continue;
+			var src = army.src.split(',')
+			var dst = army.dst.split(',')
+			var YOFFSET = GY * 1.5
+			var YOFFSET2 = GY * 1.5 - 15
+			drawLine(hctx, parseInt(src[0]) * GX, parseInt(src[1]) * GY + YOFFSET,
+					 parseInt(dst[0]) * GX, parseInt(dst[1]) * GY + YOFFSET)
+			var src0x = parseInt(src[0]), src0y = parseInt(src[1])
+			var dst0x = parseInt(dst[0]), dst0y = parseInt(dst[1])
+			var armyRelX = (src0x-dst0x) * perc, armyRelY = (src0y-dst0y) * perc
+			var armyX = armyRelX + dst0x, armyY = armyRelY + dst0y
+			hctx.fillRect(armyX * GX, armyY * GY + YOFFSET2, 20, 20)
+		}
+		
+		hctx.strokeStyle = 'gray'
+		
+		for(var i=0; i<GW; i++) {
+			for(var j=0; j<GH; j++) {
+				var ex = x+i, ey=y+j
+				var entry = getEntry(ex, ey)
+				if(entry) {
+					hctx.font = "bold 20px sans-serif";
+					hctx.fillText("" + entry[3], ex*GX, ey*GY)
+				}
+			}
+		}
+	}
+	
+	var entryElems = {}
+	var SECTOR_SIZE = 80
+	var sectors = {}
+	var entries = {}
+	
+	function getEntry(x, y) {
+		var e = entries[x + ',' + y]
+		fetch(x, y)
+		if(e) {
+			getEntryElem(e, x, y)
+			return e
+		} else
+			return null
+	}
+	
+	function getEntryElem(e, x, y) {
+		var pos = (x + ',' + y)
+		if(!entryElems[pos]) {
+			var elem = $('<a target=_parent><img src="cgm.png" class=cityimg></a>')
+			var url = '/city/' + e[1]
+			elem.attr('x3d', x * GX)
+			elem.attr('y3d', y * GY)
+			elem.attr('href', url)
+			elem.click(function(){
+				window.parent.fw_run_widget_link({url: url})
+				return false
+			})
+			$('#cc').append(elem)
+			entryElems[pos] = elem
+			Map3d.watch(elem)
+		}
+	}
+	
+	function fetch(ox, oy) {
+		var sx = Math.floor(ox / SECTOR_SIZE), sy = Math.floor(oy / SECTOR_SIZE)
+		
+		if(sectors[sx + ',' + sy])
+			return
+		sectors[sx + ',' + sy] = true
+		
+		var x = sx * SECTOR_SIZE, y = sy * SECTOR_SIZE
+		$.get('/api/get_map_field?x=' + x + '&y=' + y, function(val){
+			val = eval('(' + val + ')')
+			for(var i in val) {
+				var entry = val[i]
+				entries[entry[0] + ',' + entry[1]] = entry[2]
+			}
+		})
+	}
+	
+	Map3d.watch('#k')
+	
+	var max_size = $.browser.webkit?1400:500
+	
+	function adjustToWindow() {
+		var maxw = $(window).width()
+		var maxh = Math.min($(window).height(), $(window).width() * 0.5)
+		var w = Math.min(max_size, maxw)
+		var h = Math.min(max_size, maxh)
+		canvas.width = w / Map3d.globalZoom
+		canvas.height = h / Map3d.globalZoom
+		canvas.style.width = w + 'px'
+		canvas.style.height = h + 'px'
+		hcanvas.width = w * 1.7
+		hcanvas.height = h * 2
+		Map3d.render()
+		GW = hcanvas.width / GX
+		GH = hcanvas.height / GY
+	}
+	
+	$(window).resize(adjustToWindow)
+	
+	var grass = new Image()
+	grass.onload = onLoad
+	grass.src = 'grass.png'
+	
+	var cityImg = new Image()
+	cityImg.src = 'cgm.png'
+	
+	var ydir = 0
+	var xdir = 0
+	var MOVE_SPEED = 10
+	var SPEED_INCR = 1.1
+	var MAX_SPEED = 25
+	
+	$(window).keydown(function(ev){
+		var code = ev.keyCode
+		if(code == 39) xdir = 2
+		if(code == 37) xdir = -2
+		if(code == 38) ydir = -2
+		if(code == 40) ydir = 2
+	}).keyup(function(ev){
+		var code = ev.keyCode
+		if(code == 39) xdir = 0
+		if(code == 37) xdir = 0
+		if(code == 38) ydir = 0
+		if(code == 40) ydir = 0
+	})
+	
+	setInterval(function(){
+		if(xdir || ydir) {
+			Map3d.x += xdir * MOVE_SPEED
+			Map3d.y += ydir * MOVE_SPEED
+			Map3d.render()
+			xdir *= SPEED_INCR
+			ydir *= SPEED_INCR
+			xdir = Math.min(xdir, MAX_SPEED)
+			ydir = Math.min(ydir, MAX_SPEED)
+		}
+		
+	}, 60)
+	
+	var lastState = window.parent ? window.parent.location.pathname : '/map/0,0'
+	
+	var STATE_OFFSET_X = -16, STATE_OFFSET_Y = -7
+	var STATE_OFFSET_VAR = -0.025
+	
+	function navigate0(url) {
+		setTimeout(function(){
+			console.log(canvas.width)
+			var state = (url.slice(5) || '0,0').split(',')
+			Map3d.x = parseInt(state[0])*GX + STATE_OFFSET_X*GX + (canvas.width-650)*STATE_OFFSET_VAR*GX
+			Map3d.y = parseInt(state[1])*GY + STATE_OFFSET_Y*GY
+		}, 100)
+	}
+	
+	navigate0(lastState)
+	
+	function navigate(url) {
+		navigate0(url)
+		window.parent.history.replaceState(null, null, url)
+		Map3d.render()
+	}
+	
+	setInterval(function(){
+		if(ydir || xdir) // still moving?
+			return
+		var state = ('/map/' + Math.round(Map3d.x/GX - STATE_OFFSET_X - (canvas.width-650)*STATE_OFFSET_VAR)
+				+ ',' + Math.round(Map3d.y/GY - STATE_OFFSET_Y))
+		// changed till last time?
+		if(lastState != state) {
+			if(window.parent) {
+				if(window.parent.history.replaceState) {
+					window.parent.history.replaceState(null, null, state)
+					window.parent.fw_current_location = state
+				}
+			}
+			lastState = state
+		}
+	}, 1000)
+	
+	$(function(){
+		$('[m]').each(function(){
+			var elem = $(this)
+			var text = elem.attr('m').split(',')
+			var x = parseInt(text[0]), y = parseInt(text[1])
+			elem.mouseover(function(){
+				ydir = y
+				xdir = x
+			}).mouseout(function(){
+				ydir = 0
+				xdir = 0
+			})
+		})
+	})
+	
+	$(document).ajaxStart(function(){
+		$('#ajax-loading').show()
+	}).ajaxStop(function(){
+		$('#ajax-loading').hide()
+	})
+</script>
+
+<div id=ajax-loading>loading...</div>

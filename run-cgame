@@ -1,0 +1,3 @@
+python ~/Apps/google_appengine/dev_appserver.py ~/Projects/cgame --datastore_path=/home/michal/Projects/.cgame-datastore \
+	--blobstore_path=/home/michal/Projects/.cgame-blobstore --history_path=/home/michal/Projects/.cgame-datastore-history \
+	-p 8010

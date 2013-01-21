@@ -1,0 +1,275 @@
+[[PART city]]
+<span class=title-normline>
+	<form action=set_title(title:$title)>
+		<input type=text name=title value=$city.title>
+		<span class=change>
+			<button submit>Change name</button>
+		</span>
+	</form>
+</span>
+
+<table id=main-city>
+<tr class=columns>
+	<td class=img-column>
+		<iframe src="$get_battle_url()" class=battle-iframe />
+		<script type=fw/resize>
+			$('.battle-iframe').css('min-height', $(window).height()- 120)
+		</script>
+	</td>
+	<td class="small-column acolumn"><div class=queues>
+			<foreach list=$state.unit_queues var=queue key=name name=queues>
+			<div class=queue>
+				<div>
+					<span class=title><text e="$queue.name" /></span>
+					<span class=show-level>
+						<t>Level</t> <display e="$queue.building" />
+					</span>
+					<a action="build(name: $queue.name)">
+						<img src=/static/add.png class=add-img alt="+">
+					</a>
+				</div>
+				<foreach list=$queue.items var=item name=queueitems key=name>
+				<span class=queueitem>
+					<text e=$item.name />
+					<display e=$ceil($item.count) />
+					<img src=/static/add.png class=add-img
+						onclick="0; $(this).parent().find('.add-form').slideToggle()">
+					<div class=queueitemover>
+						<!--<img src="/static/img" class=medium-img />-->
+						<div class=unittoolbar>
+							<div>
+							<foreach list=$item.config.costs.items var=res>
+								<span class=res>
+									<img src=$get_img($res.0) class=small-img />
+									<display e=$int($res.1) />
+								</span>
+							</foreach>
+							</div>
+							<a action="item_more(name: $item.name)">more</a>
+							<a action="dissolve(name: $item.name)">dissolve</a>
+						</div>
+					</div>
+					
+					<form action="train(name:$item.name, amount:$amount)" class=add-form>
+						<t>How much</t>?
+						<input type=text name=amount />
+						<button submit>Ok</button>
+					</form>
+				</span>
+				</foreach>
+				<if true=$queue.isproducing>
+				<div>
+					<t>Producing</t>:
+					<foreach list=$queue.producing var=item>
+					<span class=queueitem>
+						<text e="$item.name" />
+						<display e="$item.count" />
+					</span>
+					</foreach>
+					<t>Left</t>: <timecounter time=$queue.left />
+				</div>
+				</if>
+			</div>
+			</foreach>
+		</div>
+		<hr />
+		<if true=$state.building_progress>
+			<h3><t>Buildings</t></h3>
+			<foreach list="$state.building_progress" var=progress name=buildingprogress>
+			<div>
+				<text e=$progress.1 />:
+				<timecounter time=$progress.0 />
+			</div>
+			</foreach>
+		</if>
+		<h3>Wydobycie</h3>
+		<div class=main-res>
+			<foreach list=$state.resources var=res>
+			<nobr>
+			<span class=res>
+				<img src=$get_img($res.name) class=small-img />
+				<increaser start=$int(x:$res.count) step=$res.income />
+			</span>
+			</nobr>
+			</foreach>
+		</div>
+		<table>
+			<foreach list=$state.resources var=res key=name>
+				<tr>
+					<td><text e=$res.name />:</td>
+					<td><display e="$round($int($res.income), $int(3))" /><t>/hour</t></td>
+				</tr>
+				
+				<foreach list=$res.buildings var=building key=0>
+				<tr>
+					<td class=res-buildings>
+						<span>
+							<span class=title>
+								<text e=$building.0 />
+							</span>
+						</span>
+					</td>
+					<td>
+						<span class=show-level>
+							(<t>Level</t> <display e="$building.1" />
+							<a action="build(name: $building.0)"><img src=/static/add.png class=add-img alt="+"></a>)
+						</span>
+					</td>
+				</tr>
+				</foreach>
+			</foreach>
+		</table>
+		
+		<if true=$armies>
+		<h3>Stacjonujące armie</h3>
+		<foreach list=$armies var=army>
+		<div>
+			<b><text e=$army.2 /></b>
+			<foreach list=$army.1.items var=kind>
+				<img src=$get_img($kind.0,min) class=small-img title=$kind.0 />
+				<display e=$ceil($kind.1) />
+			</foreach>
+			<a title=$army.0>Gracz</a>
+		</div>
+		</foreach>
+		</if>
+		
+		<if true=$state.travelling_to>
+		<h3>Armie do</h3>
+		<foreach list=$state.travelling_to var=army>
+		<div>
+			<strong><display e=$army.mission /></strong>
+			<timecounter time=$army.time />
+			<mini-units e=$army.units />
+			<a title=$army.player>Gracz</a>
+		</div>
+		</foreach>
+		</if>
+		
+		<button href="$get_dialog_url(attack)" dialog class=blue>Attack</button>
+		<button href="$get_dialog_url(battlelog)" dialog class=blue>Battlelog</button>
+
+		<!--<h3>debug</h3>
+		
+		Events: <display e=$city.events /> <br />
+		Foreign Armies: <display e=$city.foreign_armies /> <br />
+		Enemy Garnison: <display e=$city.enemy_garnison /> <br />
+		Garnison: <display e=$city.garnison /> <br />
+		Friends Garnison: <display e=$city.friends_garnison /> <br />-->
+	</td>
+</tr>
+</table>
+
+<script type=fw/init>
+$('.add-form').hide().addClass('js')
+</script>
+
+[[PART city-preview]]
+<a href=game(city:$id) class=city-preview>
+	<div>
+		<h4>Miasto <display e=$city.title /> (<display e=$id />)</h4>
+		
+		<span href=$get_map_url($id) class="fw-link map-button">
+			mapa
+		</span>	
+	</div>
+	<div>
+		<foreach list=$state.resources var=res>
+		<span class=res>
+			<img src=$get_img($res.name) class=small-img />
+			<display e=$int(x:$res.count) />
+		</span>
+		</foreach>
+	</div>
+</a>
+
+<script type=fw/init>
+var map = $('#map-iframe')
+fw_elem.find('span[href]').click(function(){
+	if(map.length != 0 && history.pushState)
+		map[0].contentWindow.navigate($(this).attr('href'))
+	else
+		location.href = $(this).attr('href')
+	return false;
+})
+</script>
+[[PART timecounter]]
+
+<span>
+	<span class=seconds>
+		<if true="$ge($seconds,$int(0))">
+			<display e="$seconds" />
+		</if>
+		<if false="$gt($seconds,$int(0))">
+			Zablokowane
+		</if>
+	</span>
+	<script type="fw/init"><![CDATA[
+		var seconds = fw_elem.find('.seconds')
+		var start_seconds = parseInt(seconds.text())
+		console.log('start', start_seconds)
+		var timeout = setInterval(function() {
+			var integer = parseInt(seconds.text())
+			if(integer != integer)
+				return
+			if(start_seconds > 1 && integer == 0) {
+				fw_reload()
+				clearInterval(timeout)
+			}
+			if(integer > 0)
+				seconds.text(integer - 1)
+		}, 1000)
+	]]></script>
+</span>
+
+[[PART increaser]]
+<span class=value>
+	<display e="$int($start)" />
+</span>
+<script type=fw/init>
+	var elem = fw_elem.find('.value')
+	var value = parseInt('<display e="$int($start)" />')
+	var step = parseInt('<display e="$int($step)" />') / 3600
+	
+	setInterval(function(){
+		value += step
+		elem.text(Math.floor(value))
+	}, 1000)
+</script>
+
+[[PART test]]
+
+<display e="$l" />
+<foreach var=v list=$l>
+	<display e=$v /><br>
+</foreach>
+<button action=append>append</button>
+
+[[PART battlelog]]
+<foreach var=entry list=$log>
+<div>
+	<display e=$entry.1 /> <br>
+	<display e=$format_time($entry.0) /> <br>
+	<if true=$eq($entry.1,battle)>
+		Atak: <mini-units e=$entry.2.attacker /> <br>
+		Obrona: <mini-units e=$entry.2.defender />
+		<fast-foreach var=entry list=$entry.2.units>
+		<div>
+			<u><display e="$entry.0" /></u>
+			<b><display e="$entry.3" /> <text e="$entry.1" /></b> attacked
+			and killed <b><display e="$entry.4" /> <text e="$entry.2" /></b>
+			(out of <b><display e="$entry.5" /></b>)
+		</div>
+		</fast-foreach>
+	</if>
+	<if true=$eq($entry.1,army)>
+		<mini-units e=$entry.2.units />
+		<display e=$entry.2.player />
+		<display e=$entry.2.mission />
+	</if>
+</div>
+<hr />
+</foreach>
+
+
+

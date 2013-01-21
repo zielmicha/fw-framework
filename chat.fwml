@@ -1,0 +1,42 @@
+[[PART messages]]
+<if false=$to>
+	<button href=game(what:friends;friends,opt:sendmail)>
+		<img src=/static/icon/email_add.png />
+		Napisz
+	</button>
+</if>
+<if true=$to>
+	<h2>Wiadomość do <display e=$to /></h2>
+	<form action=send(content:$content,to:$to)>
+		<textarea name=content style="width:90%;height:10em;"></textarea>
+		<div>
+			<button submit> <img src=/static/icon/email_go.png /> Wyślij</button>
+			<button href=game(what:messages)>Anuluj</button>
+		</div>
+	</form>
+</if>
+<h2>Wiadomości</h2>
+<foreach var=message list=$messages key=id>
+<div class=msg>
+	<div><display e=$message.content /></div>
+	<if true=$message.link>
+		<a href=$message.link><display e=$message.link_desc /></a>
+	</if>
+	<div class=sender>
+		<t>Sender</t>:
+		<a href="game(profile:$message.sender)"><display e=$message.sender /></a>
+	</div>
+	<div class=time>
+		<t>Sent time</t>:
+		<display e=$format_time($message.time) />
+	</div>
+	<div class=buttons>
+		<button action="remove(id:$message.id)">
+			<img src=/static/icon/email_delete.png /> Usuń
+		</button>
+		<button href="game(what:messages;messages,to:$message.sender)">
+			<img src=/static/icon/email_go.png /> Odpowiedz
+		</button>
+	</div>
+</div>
+</foreach>

@@ -1,0 +1,42 @@
+[[PART city]]
+<pre>
+<if false=$city>
+City does not exist.
+<button action=create_city>Create city</button>
+</if>
+<if true=$city>
+	<strong>Resources: </strong>
+		<display e=$city.resources />
+	<strong>Income: </strong>
+		<display e=$city.resource_income />
+	<strong>Build buildings: </strong>
+		<display e=$city.buildings />
+	<strong><a onclick="jQuery('#builder').slideToggle()">Build building</a></strong>
+		<form action=build(name:$name) id=builder>
+			Building type: <input type=text name=name>
+			<button submit>Build</button>
+		</form>
+	<strong>Queue: </strong>
+		<display e=$city.events />
+	<strong>Unit queues: </strong>
+		<display e=$city.unit_queues />
+	<strong><a onclick="jQuery('#trainer').slideToggle()">Train units</a></strong> 
+		<form action=train_units(name:$name,amount:$amount) id=trainer>
+			Unit type: <input type=text name=name>
+			Amount:    <input type=text name=amount>
+			<button submit>Train</button>
+		</form>
+	<strong>Garnison: </strong>
+		<display e=$city.garnison />
+	<strong>Time <display e=$city.updated /> </strong>
+	<strong><a onclick="jQuery('#gift').slideToggle()">Gift</a></strong>
+		<form action=gift(name:$name,num:$num) id=gift>
+			Res type: <input type=text name=name>
+			Value:    <input type=text name=num>
+			<button submit>Build</button>
+		</form>
+</if>
+</pre>
+<script type=fw/init>
+	$('#trainer, #builder, #gift').hide()
+</script>
